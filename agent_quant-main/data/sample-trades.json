@@ -1,0 +1,181 @@
+{
+  "summary": {
+    "initialCapital": 100000,
+    "strategies": [
+      {
+        "name": "Trend-only",
+        "totalReturn": 0.2756,
+        "annualReturn": 0.0741,
+        "maxDrawdown": -0.1235,
+        "sharpe": 0.6966,
+        "numTrades": 135
+      },
+      {
+        "name": "MeanRev-only",
+        "totalReturn": -0.0600,
+        "annualReturn": -0.0180,
+        "maxDrawdown": -0.3361,
+        "sharpe": -0.0337,
+        "numTrades": 50
+      },
+      {
+        "name": "Fusion(no-ML)",
+        "totalReturn": 0.1018,
+        "annualReturn": 0.0289,
+        "maxDrawdown": -0.1343,
+        "sharpe": 0.2817,
+        "numTrades": 214
+      },
+      {
+        "name": "Fusion(+ML-veto)",
+        "totalReturn": 0.1990,
+        "annualReturn": 0.0547,
+        "maxDrawdown": -0.1286,
+        "sharpe": 0.5182,
+        "numTrades": 82
+      }
+    ]
+  },
+  "equityCurves": {
+    "labels": [
+      "2024-01-01","2024-01-08","2024-01-15","2024-01-22","2024-01-29",
+      "2024-02-05","2024-02-08"
+    ],
+    "Trend-only": [100000, 100000, 100000, 107347, 112865, 112865, 112865],
+    "MeanRev-only": [100000, 99972, 95632, 98704, 98698, 94931, 92861],
+    "Fusion(no-ML)": [100000, 99972, 98704, 105452, 114252, 110969, 110969],
+    "Fusion(+ML-veto)": [100000, 99972, 98704, 105452, 114252, 110969, 110969]
+  },
+  "trades": [
+    {
+      "id": 1,
+      "time": "2024-01-18 09:30",
+      "symbol": "000001.SH",
+      "strategy": "Trend-only",
+      "direction": "买入",
+      "quantity": 1000,
+      "entryPrice": 15.23,
+      "exitPrice": 16.45,
+      "pnl": 1220.0,
+      "returnPct": 0.0801,
+      "status": "已平仓"
+    },
+    {
+      "id": 2,
+      "time": "2024-01-19 10:15",
+      "symbol": "600519.SH",
+      "strategy": "Trend-only",
+      "direction": "买入",
+      "quantity": 100,
+      "entryPrice": 1680.5,
+      "exitPrice": 1720.3,
+      "pnl": 3980.0,
+      "returnPct": 0.0237,
+      "status": "已平仓"
+    },
+    {
+      "id": 3,
+      "time": "2024-01-20 11:00",
+      "symbol": "159629.SZ",
+      "strategy": "MeanRev-only",
+      "direction": "卖出",
+      "quantity": 5000,
+      "entryPrice": 2.18,
+      "exitPrice": 2.12,
+      "pnl": -300.0,
+      "returnPct": -0.0275,
+      "status": "已平仓"
+    },
+    {
+      "id": 4,
+      "time": "2024-01-21 14:30",
+      "symbol": "000001.SH",
+      "strategy": "Fusion(+ML-veto)",
+      "direction": "买入",
+      "quantity": 2000,
+      "entryPrice": 15.56,
+      "exitPrice": 16.88,
+      "pnl": 2640.0,
+      "returnPct": 0.0848,
+      "status": "已平仓"
+    },
+    {
+      "id": 5,
+      "time": "2024-01-22 09:45",
+      "symbol": "600519.SH",
+      "strategy": "Trend-only",
+      "direction": "买入",
+      "quantity": 50,
+      "entryPrice": 1695.0,
+      "exitPrice": 1650.2,
+      "pnl": -2240.0,
+      "returnPct": -0.0264,
+      "status": "已平仓"
+    },
+    {
+      "id": 6,
+      "time": "2024-01-23 13:20",
+      "symbol": "159925.SZ",
+      "strategy": "Fusion(no-ML)",
+      "direction": "买入",
+      "quantity": 10000,
+      "entryPrice": 0.98,
+      "exitPrice": 1.05,
+      "pnl": 700.0,
+      "returnPct": 0.0714,
+      "status": "已平仓"
+    },
+    {
+      "id": 7,
+      "time": "2024-01-24 10:00",
+      "symbol": "000001.SH",
+      "strategy": "MeanRev-only",
+      "direction": "卖出",
+      "quantity": 1500,
+      "entryPrice": 16.90,
+      "exitPrice": 16.50,
+      "pnl": -600.0,
+      "returnPct": -0.0237,
+      "status": "已平仓"
+    },
+    {
+      "id": 8,
+      "time": "2024-01-25 15:00",
+      "symbol": "600519.SH",
+      "strategy": "Fusion(+ML-veto)",
+      "direction": "买入",
+      "quantity": 80,
+      "entryPrice": 1710.0,
+      "exitPrice": 1785.5,
+      "pnl": 6040.0,
+      "returnPct": 0.0441,
+      "status": "已平仓"
+    },
+    {
+      "id": 9,
+      "time": "2024-01-26 09:30",
+      "symbol": "159629.SZ",
+      "strategy": "Trend-only",
+      "direction": "买入",
+      "quantity": 8000,
+      "entryPrice": 2.05,
+      "exitPrice": 2.22,
+      "pnl": 1360.0,
+      "returnPct": 0.0829,
+      "status": "已平仓"
+    },
+    {
+      "id": 10,
+      "time": "2024-01-28 11:30",
+      "symbol": "000001.SH",
+      "strategy": "Fusion(no-ML)",
+      "direction": "买入",
+      "quantity": 3000,
+      "entryPrice": 15.80,
+      "exitPrice": 15.60,
+      "pnl": -600.0,
+      "returnPct": -0.0127,
+      "status": "已平仓"
+    }
+  ]
+}

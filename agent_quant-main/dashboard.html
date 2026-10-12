@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Agent Quant — 量化交易系统可视化仪表板" />
+  <title>Agent Quant · 交易仪表板</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+
+  <script src="./scripts/vendor/chart.umd.js"></script>
+  <!-- Design tokens must load first -->
+  <link rel="stylesheet" href="./styles/variables.css" />
+  <link rel="stylesheet" href="./styles/animations.css" />
+  <link rel="stylesheet" href="./styles/dashboard.css" />
+  <link rel="stylesheet" href="./styles/responsive.css" />
+</head>
+
+<body>
+  <!-- Loading overlay -->
+  <div id="loading-overlay" role="status" aria-label="加载中">
+    <div class="loading-logo">📈</div>
+    <div class="spinner"></div>
+    <span class="loading-text">加载数据中…</span>
+    <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+  </div>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+
+  <div class="app-wrapper">
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="主导航">
+      <div class="sidebar-logo">
+        <div class="logo-icon" aria-hidden="true">📈</div>
+        <div>
+          <div class="logo-text">Agent Quant</div>
+          <div class="logo-sub">量化交易系统</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">主菜单</div>
+        <div class="nav-item" data-page="overview" role="button" tabindex="0">
+          <span class="nav-icon" aria-hidden="true">🔬</span><span>系统概述</span>
+        </div>
+        <div class="nav-item active" data-page="dashboard" role="button" tabindex="0" aria-current="page">
+          <span class="nav-icon" aria-hidden="true">🏠</span><span>仪表板</span>
+        </div>
+        <div class="nav-item" data-page="analysis" role="button" tabindex="0">
+          <span class="nav-icon" aria-hidden="true">📊</span><span>收益分析</span>
+        </div>
+        <div class="nav-item" data-page="strategy" role="button" tabindex="0">
+          <span class="nav-icon" aria-hidden="true">🤖</span><span>策略对比</span>
+        </div>
+        <div class="nav-item" data-page="trades" role="button" tabindex="0">
+          <span class="nav-icon" aria-hidden="true">📋</span><span>交易记录</span>
+        </div>
+        <div class="nav-section-title">系统</div>
+        <div class="nav-item" data-page="config" role="button" tabindex="0">
+          <span class="nav-icon" aria-hidden="true">⚙️</span><span>回测配置</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div>
+          <span class="status-dot animate-pulse" id="api-status-dot" aria-hidden="true"></span>
+          <span id="api-status-text">检测 API…</span>
+        </div>
+        <div style="margin-top:6px;color:var(--text-dim)">最后更新：<span id="last-update">—</span></div>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar" role="banner">
+        <div style="display:flex;align-items:center;gap:12px;min-width:0">
+          <button class="hamburger" id="hamburger-btn" aria-label="打开菜单" aria-expanded="false" aria-controls="sidebar">
+            <span></span><span></span><span></span>
+          </button>
+          <div class="topbar-left" style="min-width:0">
+            <h1 id="page-title">交易仪表板</h1>
+            <p id="page-subtitle">多策略量化回测结果概览</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <select class="strategy-select" id="strategy-select" aria-label="选择策略">
+            <option value="all">全部策略 (最优)</option>
+            <option value="Trend-only">Trend-only</option>
+            <option value="MeanRev-only">MeanRev-only</option>
+            <option value="Fusion(no-ML)">Fusion(no-ML)</option>
+            <option value="Fusion(+ML-veto)">Fusion(+ML-veto)</option>
+          </select>
+          <button class="btn btn-ghost" id="refresh-btn" aria-label="刷新数据" data-tooltip="刷新数据">
+            🔄 <span>刷新</span>
+          </button>
+          <button class="theme-toggle-btn" id="theme-toggle-btn" aria-label="切换主题" data-tooltip="切换主题">
+            <span class="theme-icon">☀️</span>
+            <span class="theme-toggle-label">亮色</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="dashboard-body" role="main">
+
+        <!-- PAGE: overview -->
+        <section class="page-section hidden" id="page-overview" aria-labelledby="overview-heading">
+          <h2 id="overview-heading" class="sr-only">系统概述</h2>
+
+          <!-- System intro banner -->
+          <div class="overview-banner">
+            <div class="overview-banner-text">
+              <div class="overview-banner-title">📈 Agent Quant — 多智能体量化交易系统</div>
+              <div class="overview-banner-sub">
+                基于多智能体协同的A股量化投资研究平台 &nbsp;·&nbsp; 本科毕业设计展示系统 &nbsp;·&nbsp;
+                数据来源：AKShare（东方财富 / 新浪财经）
+              </div>
+            </div>
+            <button class="btn btn-primary" id="overview-run-btn" style="flex-shrink:0">⚡ 快速回测</button>
+          </div>
+
+          <!-- Architecture flow -->
+          <div class="section-header" style="margin-top:1.5rem">
+            <div class="section-title"><span class="icon" aria-hidden="true">🏗️</span>系统架构</div>
+          </div>
+          <div class="arch-flow" role="img" aria-label="系统架构流程图">
+            <div class="arch-node arch-node-data">
+              <div class="arch-node-icon">🗄️</div>
+              <div class="arch-node-label">数据层</div>
+              <div class="arch-node-desc">DataAgent<br>AKShare API<br>本地缓存</div>
+            </div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-node arch-node-agents">
+              <div class="arch-node-icon">🤖</div>
+              <div class="arch-node-label">智能体层</div>
+              <div class="arch-node-desc">TrendAgent<br>MeanRevAgent<br>MLAgent (XGBoost)</div>
+            </div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-node arch-node-coord">
+              <div class="arch-node-icon">⚙️</div>
+              <div class="arch-node-label">协调层</div>
+              <div class="arch-node-desc">CoordinatorAgent<br>加权投票 + ML否决<br>信号融合</div>
+            </div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-node arch-node-backtest">
+              <div class="arch-node-icon">📊</div>
+              <div class="arch-node-label">回测层</div>
+              <div class="arch-node-desc">BacktestEngine<br>含手续费/滑点<br>资金管理</div>
+            </div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-node arch-node-viz">
+              <div class="arch-node-icon">🖥️</div>
+              <div class="arch-node-label">可视化层</div>
+              <div class="arch-node-desc">Flask REST API<br>Chart.js 图表<br>本仪表板</div>
+            </div>
+          </div>
+
+          <!-- Strategy descriptions -->
+          <div class="section-header" style="margin-top:1.5rem">
+            <div class="section-title"><span class="icon" aria-hidden="true">📚</span>策略说明</div>
+          </div>
+          <div class="overview-strategy-grid">
+            <div class="overview-strategy-card">
+              <div class="overview-strategy-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6">📈</div>
+              <div>
+                <div class="overview-strategy-name">趋势跟踪策略 (Trend-only)</div>
+                <div class="overview-strategy-desc">
+                  基于双均线交叉信号（短期MA(5) / 长期MA(20)）。当短期均线上穿长期均线时买入，
+                  下穿时卖出。捕捉中长期价格动量趋势，适合趋势明显的行情。
+                </div>
+                <div class="overview-strategy-formula">信号 = sign(MA_short - MA_long)</div>
+              </div>
+            </div>
+            <div class="overview-strategy-card">
+              <div class="overview-strategy-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b">↕️</div>
+              <div>
+                <div class="overview-strategy-name">均值回归策略 (MeanRev-only)</div>
+                <div class="overview-strategy-desc">
+                  基于布林带（Bollinger Bands）的反转策略。价格跌破下轨（mu - 1.2*sigma）时买入，
+                  回归均线时卖出。适合震荡行情，利用价格均值回复特性。
+                </div>
+                <div class="overview-strategy-formula">信号 = 1 if P &lt; mu - 1.2*sigma else (-1 if P &gt; MA)</div>
+              </div>
+            </div>
+            <div class="overview-strategy-card">
+              <div class="overview-strategy-icon" style="background:rgba(16,185,129,0.15);color:#10b981">🔀</div>
+              <div>
+                <div class="overview-strategy-name">融合策略 (Fusion no-ML)</div>
+                <div class="overview-strategy-desc">
+                  加权融合趋势信号与均值回归信号（默认权重 0.6 : 0.4）。
+                  通过 CoordinatorAgent 综合两种策略的置信度分数，当综合信号强度超过阈值时触发交易。
+                </div>
+                <div class="overview-strategy-formula">Score = 0.6*trend + 0.4*meanrev; 买入 if Score &gt; theta</div>
+              </div>
+            </div>
+            <div class="overview-strategy-card">
+              <div class="overview-strategy-icon" style="background:rgba(168,85,247,0.15);color:#a855f7">🧠</div>
+              <div>
+                <div class="overview-strategy-name">ML 融合策略 (Fusion +ML-veto)</div>
+                <div class="overview-strategy-desc">
+                  在融合策略基础上增加 XGBoost 机器学习否决机制。当 ML 模型预测下跌概率
+                  超过阈值（默认 0.55）时，否决买入信号，减少假阳性交易。
+                </div>
+                <div class="overview-strategy-formula">最终信号 = Fusion信号 AND (ML_prob &lt; 0.55)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Performance summary (filled by JS) -->
+          <div class="section-header" style="margin-top:1.5rem">
+            <div class="section-title"><span class="icon" aria-hidden="true">📋</span>最新回测摘要</div>
+            <div style="font-size:0.8rem;color:var(--text-dim)">数据更新时间：<span id="overview-last-update">—</span></div>
+          </div>
+          <div id="overview-summary-grid" class="overview-summary-grid">
+            <div class="overview-summary-placeholder">
+              <span>📂</span>
+              <span>暂无回测数据。请前往「回测配置」运行回测，或等待数据加载完成。</span>
+            </div>
+          </div>
+
+          <!-- References -->
+          <div class="section-header" style="margin-top:1.5rem">
+            <div class="section-title"><span class="icon" aria-hidden="true">📖</span>指标参考文献</div>
+          </div>
+          <div class="overview-references">
+            <div class="ref-item"><span class="ref-tag">夏普比率</span> Sharpe, W. F. (1966). Mutual fund performance. <em>Journal of Business</em>, 39(1), 119–138.</div>
+            <div class="ref-item"><span class="ref-tag">最大回撤</span> Magdon-Ismail, M. &amp; Atiya, A. (2004). Maximum drawdown. <em>Risk Magazine</em>, 17(10), 99–102.</div>
+            <div class="ref-item"><span class="ref-tag">Sortino 比率</span> Sortino, F. &amp; van der Meer, R. (1991). Downside risk. <em>Journal of Portfolio Management</em>, 17(4), 27–31.</div>
+            <div class="ref-item"><span class="ref-tag">布林带</span> Bollinger, J. (2002). <em>Bollinger on Bollinger Bands</em>. McGraw-Hill.</div>
+            <div class="ref-item"><span class="ref-tag">XGBoost</span> Chen, T. &amp; Guestrin, C. (2016). XGBoost: A scalable tree boosting system. <em>KDD 2016</em>, 785–794.</div>
+          </div>
+        </section>
+
+        <!-- PAGE: dashboard -->
+        <section class="page-section" id="page-dashboard" aria-labelledby="dashboard-heading">
+          <h2 id="dashboard-heading" class="sr-only">仪表板</h2>
+          <div class="section-header">
+            <div class="section-title"><span class="icon" aria-hidden="true">💡</span>关键指标</div>
+          </div>
+          <div class="kpi-grid" id="kpi-grid">
+            <div class="kpi-card" id="kpi-total-return" data-formula="(终值 − 初始资金) / 初始资金 × 100%">
+              <div class="kpi-label">总收益率</div><div class="kpi-value">—</div>
+              <div class="kpi-icon" aria-hidden="true">💰</div><div class="kpi-delta neutral">加载中…</div>
+              <div class="kpi-formula">公式：(终值 − 初值) / 初值</div>
+            </div>
+            <div class="kpi-card" id="kpi-annual-return" data-formula="((1 + 总收益率)^(252/交易天数) − 1) × 100%">
+              <div class="kpi-label">年化收益率</div><div class="kpi-value">—</div>
+              <div class="kpi-icon" aria-hidden="true">📅</div><div class="kpi-delta neutral">加载中…</div>
+              <div class="kpi-formula">公式：(1+R)^(252/N) − 1</div>
+            </div>
+            <div class="kpi-card" id="kpi-max-drawdown" data-formula="最大回撤 = (峰值 − 谷值) / 峰值，取所有[峰值,谷值]对的最大值">
+              <div class="kpi-label">最大回撤</div><div class="kpi-value">—</div>
+              <div class="kpi-icon" aria-hidden="true">📉</div><div class="kpi-delta neutral">加载中…</div>
+              <div class="kpi-formula">公式：max((P_peak − P_trough) / P_peak)</div>
+            </div>
+            <div class="kpi-card" id="kpi-sharpe" data-formula="夏普比率 = (年化收益率 − 无风险利率) / 年化波动率；无风险利率默认为 0">
+              <div class="kpi-label">夏普比率</div><div class="kpi-value">—</div>
+              <div class="kpi-icon" aria-hidden="true">⚖️</div><div class="kpi-delta neutral">加载中…</div>
+              <div class="kpi-formula">公式：μ_ann / σ_ann（rf = 0）</div>
+            </div>
+            <div class="kpi-card" id="kpi-pnl" data-formula="总盈亏 = 终值 − 初始资金（已扣除手续费和滑点）">
+              <div class="kpi-label">总盈亏</div><div class="kpi-value">—</div>
+              <div class="kpi-icon" aria-hidden="true">💵</div><div class="kpi-delta neutral">加载中…</div>
+              <div class="kpi-formula">终值 − 初始资金（含费用）</div>
+            </div>
+            <div class="kpi-card" id="kpi-trades" data-formula="已完成的买卖配对交易总笔数（不含持仓中交易）">
+              <div class="kpi-label">交易笔数</div><div class="kpi-value">—</div>
+              <div class="kpi-icon" aria-hidden="true">🔢</div><div class="kpi-delta neutral">加载中…</div>
+              <div class="kpi-formula">已平仓交易对数量</div>
+            </div>
+          </div>
+
+          <!-- Risk Metrics Row -->
+          <div class="section-header" style="margin-top:1.5rem">
+            <div class="section-title"><span class="icon" aria-hidden="true">🛡️</span>风险指标</div>
+          </div>
+          <div id="risk-metrics-grid" class="risk-metrics-grid"></div>
+
+          <div class="section-header" style="margin-top:1.5rem">
+            <div class="section-title"><span class="icon" aria-hidden="true">📈</span>收益曲线</div>
+            <div class="chart-legend" id="equity-legend" aria-label="图表图例">
+              <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Trend-only</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>MeanRev-only</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Fusion(no-ML)</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#a855f7"></div>Fusion(+ML-veto)</div>
+            </div>
+          </div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">资产净值曲线（初始资金 ¥100,000）</div>
+                  <div class="chart-subtitle">含手续费 0.3‰ 及滑点 5 bps · 复权方式：前复权（qfq）</div>
+                </div>
+                <button class="btn btn-ghost chart-export-btn" data-chart="equity" style="font-size:0.75rem;padding:4px 10px" aria-label="导出图表">📷 导出</button>
+              </div>
+              <div class="chart-container"><canvas id="equity-chart" role="img" aria-label="资产净值曲线图表"></canvas></div>
+              <div class="chart-datasource">数据来源：AKShare A股行情 · 回测引擎：BacktestEngine v1.0</div>
+            </div>
+            <div class="chart-card winrate-card">
+              <div class="chart-header"><div class="chart-title">胜负比</div></div>
+              <div class="winrate-container">
+                <div class="chart-container winrate-chart-wrapper"><canvas id="winloss-chart" role="img" aria-label="胜负比图表"></canvas></div>
+                <div class="winrate-label-wrapper">
+                  <div class="winrate-value" id="winrate-label">—</div>
+                  <div class="winrate-text">胜率</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PAGE: analysis -->
+        <section class="page-section hidden" id="page-analysis" aria-labelledby="analysis-heading">
+          <h2 id="analysis-heading" class="sr-only">收益分析</h2>
+          <div class="section-header">
+            <div class="section-title"><span class="icon" aria-hidden="true">📊</span>收益分析</div>
+          </div>
+          <div class="chart-card" style="margin-bottom:1.5rem">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">资产净值曲线（完整视图）</div>
+                <div class="chart-subtitle">净值 = 当前资产 / 初始资金 · 纵轴单位：元（¥）</div>
+              </div>
+              <button class="btn btn-ghost chart-export-btn" data-chart="equityFull" style="font-size:0.75rem;padding:4px 10px" aria-label="导出图表">📷 导出</button>
+            </div>
+            <div class="chart-container" style="height:420px"><canvas id="equity-chart-full" role="img" aria-label="完整资产净值曲线图表"></canvas></div>
+            <div class="chart-datasource">数据来源：AKShare A股行情 · 计算方法参见 Sharpe (1966)</div>
+          </div>
+          <div class="section-header">
+            <div class="section-title"><span class="icon" aria-hidden="true">📉</span>回撤分析</div>
+          </div>
+          <div class="chart-card" style="margin-bottom:1.5rem">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">回撤曲线</div>
+                <div class="chart-subtitle">回撤 = (P_t − P_peak) / P_peak · 0% 表示历史高点</div>
+              </div>
+              <button class="btn btn-ghost chart-export-btn" data-chart="drawdown" style="font-size:0.75rem;padding:4px 10px" aria-label="导出图表">📷 导出</button>
+            </div>
+            <div class="chart-container" style="height:300px"><canvas id="drawdown-chart" role="img" aria-label="回撤曲线图表"></canvas></div>
+            <div class="chart-datasource">参考文献：Magdon-Ismail &amp; Atiya (2004). Maximum Drawdown. <em>Risk Magazine</em>.</div>
+          </div>
+          <div class="section-header">
+            <div class="section-title"><span class="icon" aria-hidden="true">🗓️</span>月度收益热力图</div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">月度收益分布（当前所选策略）</div>
+            </div>
+            <div id="monthly-heatmap" style="overflow-x:auto;padding:0.5rem 0"></div>
+          </div>
+        </section>
+
+        <!-- PAGE: strategy -->
+        <section class="page-section hidden" id="page-strategy" aria-labelledby="strategy-heading">
+          <h2 id="strategy-heading" class="sr-only">策略对比</h2>
+          <div class="section-header">
+            <div class="section-title"><span class="icon" aria-hidden="true">🤖</span>策略对比</div>
+          </div>
+          <div class="chart-card" style="margin-bottom:1.5rem">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">策略绩效对比（多指标）</div>
+                <div class="chart-subtitle">收益率（%）/ 夏普比率 / 最大回撤（%）横向比较</div>
+              </div>
+              <button class="btn btn-ghost chart-export-btn" data-chart="stratComparison" style="font-size:0.75rem;padding:4px 10px" aria-label="导出图表">📷 导出</button>
+            </div>
+            <div class="chart-container" style="height:300px"><canvas id="strategy-comparison-chart" role="img" aria-label="策略绩效对比图表"></canvas></div>
+            <div class="chart-datasource">注：夏普比率无风险利率取 0；收益率和回撤以百分比显示</div>
+          </div>
+          <div class="strategies-grid" id="strategy-cards"></div>
+        </section>
+
+        <!-- PAGE: trades -->
+        <section class="page-section hidden" id="page-trades" aria-labelledby="trades-heading">
+          <h2 id="trades-heading" class="sr-only">历史交易记录</h2>
+          <div class="section-header">
+            <div class="section-title"><span class="icon" aria-hidden="true">📋</span>历史交易记录</div>
+            <button class="btn btn-ghost" id="generate-report-btn" style="font-size:0.8rem;padding:5px 12px" aria-label="生成回测报告">📄 生成报告</button>
+          </div>
+          <div class="chart-card" style="margin-bottom:1.5rem">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">盈亏分布图</div>
+                <div class="chart-subtitle">已平仓交易盈亏频次分布直方图</div>
+              </div>
+              <button class="btn btn-ghost chart-export-btn" data-chart="tradePnl" style="font-size:0.75rem;padding:4px 10px" aria-label="导出图表">📷 导出</button>
+            </div>
+            <div class="chart-container" style="height:220px"><canvas id="trade-pnl-chart" role="img" aria-label="盈亏分布图表"></canvas></div>
+            <div class="chart-datasource">绿色：盈利交易；红色：亏损交易（均已扣除手续费）</div>
+          </div>
+          <!-- Trade statistics summary -->
+          <div id="trade-stats-summary" class="trade-stats-row" style="display:none"></div>
+          <div class="table-card">
+            <div class="table-toolbar">
+              <div class="search-box" role="search">
+                <span aria-hidden="true">🔍</span>
+                <input type="text" id="trade-search" placeholder="搜索品种、策略…" autocomplete="off" aria-label="搜索交易记录" />
+              </div>
+              <div style="display:flex;align-items:center;gap:0.75rem">
+                <div style="font-size:0.8rem;color:var(--text-muted)">点击表头可排序</div>
+                <button class="btn btn-ghost" id="export-csv-btn" style="font-size:0.8rem;padding:0.3rem 0.75rem" aria-label="导出为 CSV">📥 导出 CSV</button>
+              </div>
+            </div>
+            <div class="table-wrapper" role="region" aria-label="交易记录表格">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-sort="time" scope="col">时间</th>
+                    <th data-sort="symbol" scope="col">品种</th>
+                    <th data-sort="strategy" scope="col">策略</th>
+                    <th data-sort="direction" scope="col">方向</th>
+                    <th data-sort="quantity" scope="col">数量</th>
+                    <th data-sort="entryPrice" scope="col">入场价</th>
+                    <th data-sort="exitPrice" scope="col">出场价</th>
+                    <th data-sort="pnl" scope="col">盈亏 (¥)</th>
+                    <th data-sort="returnPct" scope="col">收益率</th>
+                    <th scope="col">状态</th>
+                  </tr>
+                </thead>
+                <tbody id="trades-tbody">
+                  <tr><td colspan="10" style="text-align:center;color:var(--text-dim);padding:32px">加载中…</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-pagination" role="navigation" aria-label="分页">
+              <span id="trades-info" aria-live="polite">—</span>
+              <div class="pagination-btns" id="pagination-btns"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PAGE: config -->
+        <section class="page-section hidden" id="page-config" aria-labelledby="config-heading">
+          <h2 id="config-heading" class="sr-only">回测配置</h2>
+          <div class="section-header">
+            <div class="section-title"><span class="icon" aria-hidden="true">⚙️</span>回测参数配置</div>
+          </div>
+          <div class="chart-card">
+            <form id="backtest-form" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem;padding:0.5rem 0" novalidate>
+              <div class="form-group">
+                <label class="form-label" for="f-symbol">股票代码</label>
+                <input class="form-input" type="text" id="f-symbol" value="600519" placeholder="如 600519" autocomplete="off" />
+                <small class="form-hint">沪市前缀6，深市前缀0/3</small>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="f-start-date">开始日期</label>
+                <div class="date-preset-row" role="group" aria-label="快速选择日期范围">
+                  <button type="button" class="preset-btn" data-preset="1y">1年</button>
+                  <button type="button" class="preset-btn" data-preset="3y">3年</button>
+                  <button type="button" class="preset-btn" data-preset="5y">5年</button>
+                  <button type="button" class="preset-btn" data-preset="all">全部</button>
+                </div>
+                <input class="form-input" type="date" id="f-start-date" value="2020-01-01" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="f-end-date">结束日期</label>
+                <input class="form-input" type="date" id="f-end-date" value="2024-12-31" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="f-init-cash">初始资金 (¥)</label>
+                <input class="form-input" type="number" id="f-init-cash" value="100000" min="10000" step="10000" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="f-fee-rate">手续费率 (‰)</label>
+                <input class="form-input" type="number" id="f-fee-rate" value="0.3" min="0" step="0.1" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="f-slippage">滑点 (bps)</label>
+                <input class="form-input" type="number" id="f-slippage" value="5" min="0" step="1" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="f-trend-short">趋势 — 短期均线 (天)</label>
+                <input class="form-input" type="number" id="f-trend-short" value="5" min="2" max="50" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="f-trend-long">趋势 — 长期均线 (天)</label>
+                <input class="form-input" type="number" id="f-trend-long" value="20" min="5" max="200" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="f-mr-window">均值回归 — 窗口 (天)</label>
+                <input class="form-input" type="number" id="f-mr-window" value="20" min="5" max="100" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="f-mr-std">均值回归 — 布林带倍数</label>
+                <input class="form-input" type="number" id="f-mr-std" value="1.2" min="0.5" max="4" step="0.1" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="f-ml-lookback">ML — 回看窗口 (天)</label>
+                <input class="form-input" type="number" id="f-ml-lookback" value="10" min="3" max="30" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="f-ml-train">ML — 最小训练样本</label>
+                <input class="form-input" type="number" id="f-ml-train" value="60" min="20" max="500" />
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label class="form-label">运行策略</label>
+                <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:0.4rem" role="group" aria-label="选择运行的策略">
+                  <label class="checkbox-label"><input type="checkbox" id="f-s-trend" checked /> Trend-only</label>
+                  <label class="checkbox-label"><input type="checkbox" id="f-s-mr" checked /> MeanRev-only</label>
+                  <label class="checkbox-label"><input type="checkbox" id="f-s-fusion" checked /> Fusion(no-ML)</label>
+                  <label class="checkbox-label"><input type="checkbox" id="f-s-fusionml" checked /> Fusion(+ML-veto)</label>
+                </div>
+              </div>
+              <div style="grid-column:1/-1;display:flex;align-items:center;gap:1rem;padding-top:0.5rem;flex-wrap:wrap">
+                <button type="submit" class="btn btn-primary" id="run-backtest-btn">🚀 运行回测</button>
+                <div id="backtest-status" style="font-size:0.85rem;color:var(--text-muted)" aria-live="polite"></div>
+              </div>
+              <!-- Progress bar (hidden until running) -->
+              <div style="grid-column:1/-1" id="backtest-progress" class="hidden">
+                <div class="progress-bar-container" role="progressbar" aria-label="回测进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                  <div class="progress-bar" id="backtest-progress-bar" style="width:0%"></div>
+                </div>
+                <div id="backtest-progress-text" style="font-size:0.8rem;color:var(--text-muted);margin-top:0.4rem" aria-live="polite">等待开始…</div>
+              </div>
+            </form>
+          </div>
+          <div class="section-header" style="margin-top:1.5rem">
+            <div class="section-title"><span class="icon" aria-hidden="true">🔌</span>API 状态</div>
+          </div>
+          <div class="chart-card" style="padding:1rem 1.25rem">
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.5rem">
+              后端地址：<code id="api-base-url"></code>
+            </p>
+            <p style="color:var(--text-dim);font-size:0.8rem">
+              启动后端：<code>python api_server.py</code>
+            </p>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- UI utilities must load before main dashboard script -->
+  <script src="./scripts/ui-utils.js"></script>
+  <script src="./scripts/dashboard.js"></script>
+</body>
+</html>

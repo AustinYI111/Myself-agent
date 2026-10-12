@@ -1,0 +1,129 @@
+/* ===== Responsive Design (responsive.css) ===== */
+/*
+ * Mobile-first breakpoints:
+ *   xs   < 480px
+ *   sm   480–767px
+ *   md   768–1023px
+ *   lg   1024–1279px
+ *   xl   ≥ 1280px
+ */
+
+/* ── Hamburger button (hidden on desktop) ── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+.hamburger:hover { background: var(--bg-card-hover); }
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: transform var(--duration) var(--ease), opacity var(--duration) var(--ease);
+}
+
+/* Animated X state */
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Sidebar overlay for mobile */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: calc(var(--z-overlay) - 1);
+  backdrop-filter: blur(2px);
+  animation: fadeIn var(--duration) var(--ease);
+}
+.sidebar-backdrop.visible { display: block; }
+
+/* ── Large desktop (≥ 1280px) ── */
+@media (min-width: 1280px) {
+  .dashboard-body { padding: 28px 32px; }
+  .kpi-grid { grid-template-columns: repeat(6, 1fr); }
+}
+
+/* ── Medium desktop (1024–1279px) ── */
+@media (max-width: 1279px) and (min-width: 1024px) {
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── Tablet landscape / small desktop (< 1024px) ── */
+@media (max-width: 1023px) {
+  .charts-grid { grid-template-columns: 1fr; }
+  .kpi-grid    { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── Tablet portrait (< 768px) ── */
+@media (max-width: 767px) {
+  /* Show hamburger, hide fixed sidebar */
+  .hamburger { display: flex; }
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform var(--duration-slow) var(--ease);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .main-content { margin-left: 0; }
+
+  /* Topbar adjustments */
+  .topbar { padding: 12px 16px; }
+  .topbar .strategy-select { display: none; }
+  .topbar-left h1  { font-size: var(--text-lg); }
+  .topbar-left p   { display: none; }
+
+  .dashboard-body { padding: 16px; }
+
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+  .strategies-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Stack table toolbar */
+  .table-toolbar { flex-direction: column; align-items: stretch; }
+  .search-box    { max-width: 100%; }
+
+  /* Topbar right: only show refresh button icon */
+  #refresh-btn span { display: none; }
+}
+
+/* ── Mobile (< 480px) ── */
+@media (max-width: 479px) {
+  .kpi-grid         { grid-template-columns: 1fr; }
+  .strategies-grid  { grid-template-columns: 1fr; }
+  .dashboard-body   { padding: 12px; }
+
+  .kpi-value        { font-size: var(--text-2xl); }
+
+  .topbar { gap: 8px; }
+
+  /* Hide theme label on mobile */
+  .theme-toggle-label { display: none; }
+
+  /* Compact pagination */
+  .table-pagination { flex-direction: column; gap: 8px; align-items: flex-start; }
+
+  /* Progress bar */
+  .progress-bar-container { height: 6px; }
+}
+
+/* ── Print ── */
+@media print {
+  .sidebar, .topbar, #toast-container, #loading-overlay,
+  .hamburger, .sidebar-backdrop, .theme-toggle-btn { display: none !important; }
+  .main-content { margin-left: 0 !important; }
+  .dashboard-body { padding: 0 !important; }
+  body { background: #fff !important; color: #000 !important; }
+  .kpi-card, .chart-card, .table-card { border: 1px solid #ccc !important; }
+}

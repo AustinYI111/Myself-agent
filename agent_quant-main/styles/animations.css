@@ -1,0 +1,235 @@
+/* ===== Animation Library (animations.css) ===== */
+
+/* ── Keyframes ── */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(110%); opacity: 0; }
+}
+
+@keyframes slideInDown {
+  from { transform: translateY(-16px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+
+@keyframes ripple {
+  0%   { transform: scale(0); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+/* ── Utility animation classes ── */
+
+.animate-fade-in      { animation: fadeIn      var(--duration-slow) var(--ease) both; }
+.animate-slide-in-up  { animation: slideInUp   var(--duration-slow) var(--ease) both; }
+.animate-slide-in-down{ animation: slideInDown var(--duration-slow) var(--ease) both; }
+.animate-scale-in     { animation: scaleIn     var(--duration-slow) var(--ease-bounce) both; }
+.animate-float        { animation: float 3s ease-in-out infinite; }
+.animate-pulse        { animation: pulse 2s ease-in-out infinite; }
+.animate-spin         { animation: spin  0.8s linear infinite; }
+
+/* Staggered entrance for grid items */
+.stagger-1  { animation-delay:  50ms; }
+.stagger-2  { animation-delay: 100ms; }
+.stagger-3  { animation-delay: 150ms; }
+.stagger-4  { animation-delay: 200ms; }
+.stagger-5  { animation-delay: 250ms; }
+.stagger-6  { animation-delay: 300ms; }
+.stagger-7  { animation-delay: 350ms; }
+.stagger-8  { animation-delay: 400ms; }
+
+/* ── Skeleton / loading shimmer ── */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 25%,
+    var(--bg-card-hover) 50%,
+    var(--bg-card) 75%
+  );
+  background-size: 400px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+  color: transparent !important;
+  pointer-events: none;
+  user-select: none;
+}
+
+.skeleton * { visibility: hidden; }
+
+.skeleton-text {
+  height: 0.875rem;
+  border-radius: var(--radius-full);
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-title {
+  height: 1.5rem;
+  width: 60%;
+  border-radius: var(--radius-full);
+  margin-bottom: 0.75rem;
+}
+
+.skeleton-block {
+  height: 120px;
+  border-radius: var(--radius);
+}
+
+/* ── Page transition ── */
+
+.page-enter {
+  animation: slideInUp 0.3s var(--ease) both;
+}
+
+/* ── Live badge pulse ── */
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  background: var(--success-subtle);
+  color: var(--success-light);
+  letter-spacing: 0.04em;
+}
+
+.live-badge::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success-light);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+/* ── Ripple effect on buttons ── */
+
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
+  transform: scale(0);
+  transition: transform 0.4s var(--ease-out), opacity 0.4s var(--ease-out);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.btn:active::after {
+  transform: scale(2);
+  opacity: 1;
+  transition: none;
+}
+
+/* ── Tooltip ── */
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease),
+              transform var(--duration-fast) var(--ease);
+  z-index: var(--z-dropdown);
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+/* ── Theme toggle animation ── */
+
+.theme-icon {
+  transition: transform 0.5s var(--ease-bounce), opacity var(--duration);
+}
+
+.theme-icon.switching {
+  transform: rotate(180deg);
+  opacity: 0;
+}
